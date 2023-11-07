@@ -1,0 +1,360 @@
+---
+openapi: 3.0.0
+info:
+  title: Simple Inventory API
+  description: This is a simple API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/195347/Shop_Amazon/1.0.0
+  description: SwaggerHub API Auto Mocking
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: users
+  description: Operations available to regular users
+paths:
+  /shop/categories:
+    get:
+      tags:
+      - users
+      - admins
+      summary: display categories
+      description: |
+        This request allows to display the categories of products to the users/admins
+      operationId: displayCategories
+      responses:
+        "200":
+          description: List of the categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoriesList'
+        "500":
+          description: Internal Error
+    post:
+      tags:
+      - admins
+      summary: adds an inventory item
+      description: Adds an item to the system
+      operationId: addInventory
+      requestBody:
+        description: Inventory item to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriesList'
+      responses:
+        "201":
+          description: item created
+        "400":
+          description: "invalid input, object invalid"
+        "409":
+          description: an existing item already exists
+  /shop/category/products:
+    get:
+      tags:
+      - users
+      - admins
+      summary: display the products that belong to a category
+      description: |
+        This request allows to display the products that belong to a category
+      operationId: displayCategoryProducts
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryProducts'
+        "500":
+          description: Internal Error
+  /shop/product:
+    get:
+      tags:
+      - users
+      - admins
+      summary: Display a product's details
+      description: |
+        This request allows to display the details of a specific product
+      operationId: displayProduct
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDetails'
+        "500":
+          description: Internal Error
+  /shop/order:
+    post:
+      tags:
+      - admins
+      - users
+      summary: "Confirmation of a user's order, and adding it to database"
+      description: "Confirmation of a user's order, and adding it to database"
+      operationId: userOrderAdded
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderConfirmation'
+        required: true
+      responses:
+        "200":
+          description: New order added
+        "400":
+          description: Required request body missing
+        "500":
+          description: Internal error
+  /shop/user/order:
+    get:
+      tags:
+      - admins
+      - users
+      summary: Displaying a user's orders
+      description: Display the orders of a specific user
+      operationId: userDisplayOrder
+      responses:
+        "200":
+          description: User's orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserOrders'
+  /shop/category/add:
+    post:
+      tags:
+      - admins
+      summary: Creation of a new category
+      description: Creation of a new category by the admin
+      operationId: creationCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreationCategory'
+        required: true
+      responses:
+        "200":
+          description: New category created
+        "500":
+          description: Internal error
+  /shop/category/{category_id}:
+    delete:
+      tags:
+      - admins
+      summary: Delete a category
+      description: Delete an existing category
+      operationId: deleteCategory
+      parameters:
+      - name: category_id
+        in: path
+        description: 'Category''s id '
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Category successfully deleted
+        "404":
+          description: Category does not exist
+        "500":
+          description: Internal error
+  /shop/category/product/link:
+    post:
+      tags:
+      - admins
+      summary: Creation of a new link between a category and a product
+      description: Creation of a new link between a category and a product by the admin
+      operationId: creationCategoryProductLink
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreationCategoryProductLink'
+        required: true
+      responses:
+        "200":
+          description: New link created
+        "400":
+          description: Required request body missing
+        "500":
+          description: Internal error
+  /shop/category/{category_id}/product/{product_id}/link:
+    delete:
+      tags:
+      - admins
+      summary: Delete a link between category and a product
+      description: Delete an existing link between a category and a product
+      operationId: deleteCategoryProductLink
+      parameters:
+      - name: category_id
+        in: path
+        description: 'Category''s id '
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: product_id
+        in: path
+        description: 'Product''s id '
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Link successfully deleted
+        "404":
+          description: Category or product does not exist
+        "500":
+          description: Internal error
+components:
+  schemas:
+    CategoriesList:
+      type: array
+      example:
+      - Category_id: 0
+        Category_name: sports
+      - Category_id: 1
+        Category_name: jeux
+      - Category_id: 2
+        Category_name: jardin
+      items:
+        $ref: '#/components/schemas/CategoriesList_inner'
+    CategoryProducts:
+      required:
+      - Category_id
+      - Category_name
+      - Products
+      type: object
+      properties:
+        Category_id:
+          type: integer
+          example: 2
+        Category_name:
+          type: string
+          example: Jardin
+        Products:
+          type: array
+          example:
+          - id: 1
+            name: Pelle
+          - id: 2
+            name: Rateau
+          items:
+            $ref: '#/components/schemas/CategoryProducts_Products'
+    ProductDetails:
+      required:
+      - Price
+      - Product_id
+      - Product_name
+      - Stock
+      type: object
+      properties:
+        Product_id:
+          type: integer
+          example: 1
+        Product_name:
+          type: string
+          example: Pelle
+        Price:
+          type: integer
+          example: 99
+        Stock:
+          type: integer
+          example: 986
+    OrderConfirmation:
+      required:
+      - Content
+      - Total_price
+      - User_id
+      - User_name
+      type: object
+      properties:
+        User_id:
+          type: integer
+          example: 1
+        User_name:
+          type: string
+          example: Nathan Buchin
+        Total_price:
+          type: integer
+          example: 150
+        Content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderConfirmation_Content'
+    UserOrders:
+      required:
+      - Orders
+      type: object
+      properties:
+        Orders:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/OrderConfirmation'
+    CreationCategory:
+      required:
+      - Category_name
+      type: object
+      properties:
+        Category_name:
+          type: string
+          example: electronique
+    CreationCategoryProductLink:
+      required:
+      - Category_id
+      - Product_id
+      type: object
+      properties:
+        Category_id:
+          type: integer
+          example: 1
+        Product_id:
+          type: integer
+          example: 3
+    CategoriesList_inner:
+      type: object
+      properties:
+        Category_id:
+          type: integer
+        Category_name:
+          type: string
+    CategoryProducts_Products:
+      type: object
+      properties:
+        Product_id:
+          type: integer
+        Product_name:
+          type: string
+    OrderConfirmation_Content:
+      type: object
+      properties:
+        Product_id:
+          type: integer
+        Product_name:
+          type: string
+        Quantity:
+          type: integer
+      example: "[{\"Product_id\":1,\"Product_name\":\"Pelle\",\"Quantity\":6},{\"Product_id\":2,\"Product_name\":\"Rateau\",\"Quantity\":4}]"
